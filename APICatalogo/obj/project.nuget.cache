@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "7pLrWxu4bLo=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\Junio\\RiderProjects\\APICatalogo\\APICatalogo\\APICatalogo.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Junio\\.nuget\\packages\\microsoft.aspnetcore.openapi\\9.0.0\\microsoft.aspnetcore.openapi.9.0.0.nupkg.sha512",
+    "C:\\Users\\Junio\\.nuget\\packages\\microsoft.openapi\\1.6.17\\microsoft.openapi.1.6.17.nupkg.sha512"
+  ],
+  "logs": []
+}
