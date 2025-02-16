@@ -1,15 +1,24 @@
+using System.Text.Json.Serialization;
 using APICatalogo.Context;
+using APICatalogo.Filters;
+using APICatalogo.Logging;
+using APICatalogo.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllers()
+builder.Services.AddControllers(options =>
+    {
+        options.Filters.Add(typeof(ApiExceptionFilter));
+    })
     .AddJsonOptions(options =>
-        options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles);
+    {
+        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+    });
 
-// Configuração do Swagger/OpenAPI
+// Configuraï¿½ï¿½o do Swagger/OpenAPI
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -17,14 +26,23 @@ builder.Services.AddSwaggerGen(c =>
     {
         Title = "APICatalogo",
         Version = "v1",
-        Description = "API do catálogo de produtos"
+        Description = "API do catï¿½logo de produtos"
     });
 });
 
-// Conexão com banco de dados
-string mySqlConnection = builder.Configuration.GetConnectionString("DefaultConnection");
+// Conexï¿½o com banco de dados
+string sqlConnection = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(mySqlConnection));
+    options.UseSqlServer(sqlConnection));
+
+builder.Services.AddScoped<ApiLoggingFilter>();
+builder.Services.AddScoped<ICategoriaRepository, CategoriaRepository>();
+builder.Services.AddScoped<IProdutoRepository, ProdutoRepository>();
+
+builder.Logging.AddProvider(new CustomLoggerProvider(new CustomLoggerProviderConfiguration
+{
+    LogLevel = LogLevel.Information
+}));
 
 var app = builder.Build();
 

@@ -1,8 +1,7 @@
-using APICatalogo.Context;
+using APICatalogo.Filters;
 using APICatalogo.Models;
-using Microsoft.AspNetCore.Http;
+using APICatalogo.Repositories;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace APICatalogo.Controllers;
 
@@ -10,50 +9,37 @@ namespace APICatalogo.Controllers;
 [ApiController]
 public class CategoriasController : ControllerBase
 {
-    private readonly AppDbContext _context;
+    private readonly ICategoriaRepository _repositoy;
+    private readonly ILogger<CategoriasController> _logger;
 
-    public CategoriasController(AppDbContext context)
+    public CategoriasController(ICategoriaRepository repository, ILogger<CategoriasController> logger)
     {
-        _context = context;
-    }  
-
-    [HttpGet("produtos")]
-    public ActionResult<IEnumerable<Categoria>> GetCategoriasProdutos()
-    {
-        return _context.Categorias.Include(x => x.Produtos).AsNoTracking().ToList();
-    }
+        _repositoy = repository;
+        _logger = logger;
+    }     
 
     [HttpGet]
+    [ServiceFilter(typeof(ApiLoggingFilter))]
     public ActionResult<IEnumerable<Categoria>> Get()
     {
-        try
-        {
-            return _context.Categorias.AsNoTracking().ToList();
-        }
-        catch (Exception)
-        {
-            return StatusCode(StatusCodes.Status500InternalServerError, "Erro ao tentar obter as categorias do banco de dados");
-        }
-        
+        var categorias = _repositoy.GetCategorias();
+        return Ok(categorias);
     }
 
     [HttpGet("{id:int}", Name = "ObterCategoria")]
     public ActionResult<Categoria> GetById(int id)
     {
-        try
+        var categoria = _repositoy.GetCategoria(id);
+
+        if (categoria is null)
         {
-            var categoria = _context.Categorias.AsNoTracking().FirstOrDefault(p => p.Id == id);
-
-            if (categoria is null)
-                return NotFound("Categoria não encontrada");
-
-            return Ok(categoria);
+            _logger.LogWarning($"Catergoria não encontrada");
+            return NotFound("Categoria não encontrada");
         }
-        catch (Exception)
-        {
-            return StatusCode(StatusCodes.Status500InternalServerError, "Erro ao tentar obter a categoria do banco de dados");
-        }        
+        
+        return Ok(categoria);
     }
+
 
     [HttpPost]
     public ActionResult Post(Categoria categoria)
@@ -61,10 +47,9 @@ public class CategoriasController : ControllerBase
         if (categoria is null)
             return BadRequest();
 
-        _context.Categorias.Add(categoria);
-        _context.SaveChanges();
+        var vategoriaCriada = _repositoy.Create(categoria);
 
-        return new CreatedAtRouteResult("ObterCategoria", new { id = categoria.Id }, categoria);
+        return new CreatedAtRouteResult("ObterCategoria", new { id = vategoriaCriada.Id }, vategoriaCriada);
     }
 
     [HttpPut("{id:int}")]
@@ -73,8 +58,7 @@ public class CategoriasController : ControllerBase
         if (id != categoria.Id)
             return BadRequest();
 
-        _context.Entry(categoria).State = EntityState.Modified;
-        _context.SaveChanges();
+        _repositoy.Update(categoria);
 
         return Ok(categoria);
     }
@@ -82,15 +66,14 @@ public class CategoriasController : ControllerBase
     [HttpDelete("{id:int}")]
     public ActionResult<Categoria> Delete(int id)
     {
-        var categoria = _context.Categorias.FirstOrDefault(p => p.Id == id);
+        var categoria = _repositoy.GetCategoria(id);
 
         if (categoria is null)
             return NotFound();
 
-        _context.Categorias.Remove(categoria);
-        _context.SaveChanges();
+        var categoriaExcluida = _repositoy.Delete(id);
 
-        return Ok(categoria);
+        return Ok(categoriaExcluida);
     }
 }
 
