@@ -22,14 +22,14 @@ public class CategoriasController : ControllerBase
     [ServiceFilter(typeof(ApiLoggingFilter))]
     public ActionResult<IEnumerable<Categoria>> Get()
     {
-        var categorias = _repositoy.GetCategorias();
+        var categorias = _repositoy.GetAll();
         return Ok(categorias);
     }
 
     [HttpGet("{id:int}", Name = "ObterCategoria")]
     public ActionResult<Categoria> GetById(int id)
     {
-        var categoria = _repositoy.GetCategoria(id);
+        var categoria = _repositoy.GetById(c => c.Id == id);
 
         if (categoria is null)
         {
@@ -66,12 +66,12 @@ public class CategoriasController : ControllerBase
     [HttpDelete("{id:int}")]
     public ActionResult<Categoria> Delete(int id)
     {
-        var categoria = _repositoy.GetCategoria(id);
+        var categoria = _repositoy.GetById(c => c.Id == id);
 
         if (categoria is null)
             return NotFound();
 
-        var categoriaExcluida = _repositoy.Delete(id);
+        var categoriaExcluida = _repositoy.Delete(categoria);
 
         return Ok(categoriaExcluida);
     }
