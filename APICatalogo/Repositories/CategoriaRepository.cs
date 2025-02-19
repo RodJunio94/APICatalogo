@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
 using APICatalogo.Context;
 using APICatalogo.Models;
+using APICatalogo.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace APICatalogo.Repositories;

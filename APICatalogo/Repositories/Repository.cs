@@ -1,5 +1,7 @@
 ﻿using System.Linq.Expressions;
 using APICatalogo.Context;
+using APICatalogo.Repositories.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace APICatalogo.Repositories;
 
@@ -14,8 +16,9 @@ public class Repository<T> : IRepository<T> where T : class
 
     public IEnumerable<T> GetAll()
     {
-        return _context.Set<T>().ToList();
+        return _context.Set<T>().AsNoTracking().ToList();
     }
+
     public T? GetById(Expression<Func<T, bool>> predicate)
     {
         return _context.Set<T>().FirstOrDefault(predicate);
@@ -23,21 +26,18 @@ public class Repository<T> : IRepository<T> where T : class
 
     public T Create(T entity)
     {
-        _context.Set<T>().Add(entity);
-        _context.SaveChanges();
+        _context.Set<T>().Add(entity);        
         return entity;
     }          
 
     public T Update(T entity)
     {
-        _context.Set<T>().Update(entity);
-        _context.SaveChanges();
+        _context.Set<T>().Update(entity);       
         return entity;
     }
     public T Delete(T entity)
     {
-        _context.Set<T>().Remove(entity);
-        _context.SaveChanges();
+        _context.Set<T>().Remove(entity);        
         return entity;
     }
 }

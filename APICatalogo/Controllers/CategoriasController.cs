@@ -1,6 +1,7 @@
 using APICatalogo.Filters;
 using APICatalogo.Models;
-using APICatalogo.Repositories;
+using APICatalogo.Repositories.Interfaces;
+using APICatalogo.Repositories.UnitOfWork;
 using Microsoft.AspNetCore.Mvc;
 
 namespace APICatalogo.Controllers;
@@ -9,12 +10,12 @@ namespace APICatalogo.Controllers;
 [ApiController]
 public class CategoriasController : ControllerBase
 {
-    private readonly ICategoriaRepository _repositoy;
+    private readonly IUnitOfWork _uof;
     private readonly ILogger<CategoriasController> _logger;
 
-    public CategoriasController(ICategoriaRepository repository, ILogger<CategoriasController> logger)
+    public CategoriasController(IUnitOfWork unitOfWork, ILogger<CategoriasController> logger)
     {
-        _repositoy = repository;
+        _uof = unitOfWork;
         _logger = logger;
     }     
 
@@ -22,14 +23,14 @@ public class CategoriasController : ControllerBase
     [ServiceFilter(typeof(ApiLoggingFilter))]
     public ActionResult<IEnumerable<Categoria>> Get()
     {
-        var categorias = _repositoy.GetAll();
+        var categorias = _uof.CategoriaRepository.GetAll();
         return Ok(categorias);
     }
 
     [HttpGet("{id:int}", Name = "ObterCategoria")]
     public ActionResult<Categoria> GetById(int id)
     {
-        var categoria = _repositoy.GetById(c => c.Id == id);
+        var categoria = _uof.CategoriaRepository.GetById(c => c.Id == id);
 
         if (categoria is null)
         {
@@ -47,7 +48,8 @@ public class CategoriasController : ControllerBase
         if (categoria is null)
             return BadRequest();
 
-        var vategoriaCriada = _repositoy.Create(categoria);
+        var vategoriaCriada = _uof.CategoriaRepository.Create(categoria);
+        _uof.Commit();
 
         return new CreatedAtRouteResult("ObterCategoria", new { id = vategoriaCriada.Id }, vategoriaCriada);
     }
@@ -58,7 +60,8 @@ public class CategoriasController : ControllerBase
         if (id != categoria.Id)
             return BadRequest();
 
-        _repositoy.Update(categoria);
+        _uof.CategoriaRepository.Update(categoria);
+        _uof.Commit();
 
         return Ok(categoria);
     }
@@ -66,12 +69,13 @@ public class CategoriasController : ControllerBase
     [HttpDelete("{id:int}")]
     public ActionResult<Categoria> Delete(int id)
     {
-        var categoria = _repositoy.GetById(c => c.Id == id);
+        var categoria = _uof.CategoriaRepository.GetById(c => c.Id == id);
 
         if (categoria is null)
             return NotFound();
 
-        var categoriaExcluida = _repositoy.Delete(categoria);
+        var categoriaExcluida = _uof.CategoriaRepository.Delete(categoria);
+        _uof.Commit();
 
         return Ok(categoriaExcluida);
     }
