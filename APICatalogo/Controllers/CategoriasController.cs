@@ -17,7 +17,7 @@ namespace APICatalogo.Controllers
         }
 
         [HttpGet()]
-        public IActionResult Get()
+        public ActionResult Get()
         {
             try
             {
@@ -38,7 +38,7 @@ namespace APICatalogo.Controllers
         }
 
         [HttpGet("{id:int}", Name = "ObterCategoria")]
-        public IActionResult Get(int id)
+        public ActionResult Get(int id)
         {
             var categoria = _context.Categorias?.FirstOrDefault(c => c.Id == id);
             if (categoria == null)
@@ -63,7 +63,7 @@ namespace APICatalogo.Controllers
         }
 
         [HttpPost]
-        public IActionResult Post([FromBody] Categoria categoria)
+        public ActionResult Post([FromBody] Categoria categoria)
         {
             if (categoria == null)
             {
@@ -76,7 +76,7 @@ namespace APICatalogo.Controllers
         }
 
         [HttpPut("{id:int}")]
-        public IActionResult Put(int id, [FromBody] Categoria categoria)
+        public ActionResult Put(int id, [FromBody] Categoria categoria)
         {
             if (id != categoria.Id)
             {
@@ -88,7 +88,7 @@ namespace APICatalogo.Controllers
         }
 
         [HttpDelete("{id:int}")]
-        public IActionResult Delete(int id)
+        public ActionResult Delete(int id)
         {
             var categoria = _context.Categorias?.FirstOrDefault(c => c.Id == id);
             if (categoria == null)
